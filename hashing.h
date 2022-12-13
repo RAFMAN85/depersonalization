@@ -1,5 +1,5 @@
-#ifndef UNTITLED5_SHA256_H
-#define UNTITLED5_SHA256_H
+#ifndef UNTITLED5_HASHING
+#define UNTITLED5_HASHING
 
 #include <string>
 
@@ -12,7 +12,7 @@ protected:
     typedef unsigned long long uint64;
 
     const static uint32 sha256_k[];
-    static const unsigned int SHA224_256_BLOCK_SIZE = (512/8);
+    static const unsigned int SHA256_BLOCK_SIZE = (512 / 8);
 public:
     void init();
     void update(const unsigned char *message, unsigned int len);
@@ -20,10 +20,10 @@ public:
     static const unsigned int DIGEST_SIZE = ( 256 / 8);
 
 protected:
-    void transform(const unsigned char *message, unsigned int block_nb);
-    unsigned int m_tot_len;
-    unsigned int m_len;
-    unsigned char m_block[2*SHA224_256_BLOCK_SIZE];
+    void transform(const unsigned char *message, unsigned int block_dat);
+    unsigned int total_len;
+    unsigned int length_m;
+    unsigned char block_m[2 * SHA256_BLOCK_SIZE];
     uint32 m_h[8];
 };
 
@@ -47,10 +47,10 @@ std::string sha256(std::string input);
 }
 #define SHA2_PACK32(str, x)                   \
 {                                             \
-    *(x) =   ((uint32) *((str) + 3)      )    \
+            *(x) =   ((uint32) *((str) + 3))  \
            | ((uint32) *((str) + 2) <<  8)    \
            | ((uint32) *((str) + 1) << 16)    \
            | ((uint32) *((str) + 0) << 24);   \
 }
 
-#endif //UNTITLED5_SHA256_H
+#endif
