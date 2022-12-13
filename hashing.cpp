@@ -21,18 +21,18 @@ const unsigned int SHA256::sha256_k[64] = //UL = uint32
          0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
          0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
-void SHA256::transform(const unsigned char *message, unsigned int block_nb)
+void SHA256::transform(const unsigned char *message, unsigned int block_dat)
 {
     uint32 w[64];
     uint32 wv[8];
     uint32 t1, t2;
-    const unsigned char *sub_block;
+    const unsigned char *lower_block;
     int i;
     int j;
-    for (i = 0; i < (int) block_nb; i++) {
-        sub_block = message + (i << 6);
+    for (i = 0; i < (int) block_dat; i++) {
+        lower_block = message + (i << 6);
         for (j = 0; j < 16; j++) {
-            SHA2_PACK32(&sub_block[j << 2], &w[j]);
+            SHA2_PACK32(&lower_block[j << 2], &w[j]);
         }
         for (j = 16; j < 64; j++) {
             w[j] =  SHA256_F4(w[j -  2]) + w[j -  7] + SHA256_F3(w[j - 15]) + w[j - 16];
@@ -69,8 +69,8 @@ void SHA256::init()
     m_h[5] = 0x9b05688c;
     m_h[6] = 0x1f83d9ab;
     m_h[7] = 0x5be0cd19;
-    m_len = 0;
-    m_tot_len = 0;
+    length_m = 0;
+    total_len = 0;
 }
 
 void SHA256::update(const unsigned char *message, unsigned int len)
@@ -78,38 +78,38 @@ void SHA256::update(const unsigned char *message, unsigned int len)
     unsigned int block_nb;
     unsigned int new_len, rem_len, tmp_len;
     const unsigned char *shifted_message;
-    tmp_len = SHA224_256_BLOCK_SIZE - m_len;
+    tmp_len = SHA256_BLOCK_SIZE - length_m;
     rem_len = len < tmp_len ? len : tmp_len;
-    memcpy(&m_block[m_len], message, rem_len);
-    if (m_len + len < SHA224_256_BLOCK_SIZE) {
-        m_len += len;
+    memcpy(&block_m[length_m], message, rem_len);
+    if (length_m + len < SHA256_BLOCK_SIZE) {
+        length_m += len;
         return;
     }
     new_len = len - rem_len;
-    block_nb = new_len / SHA224_256_BLOCK_SIZE;
+    block_nb = new_len / SHA256_BLOCK_SIZE;
     shifted_message = message + rem_len;
-    transform(m_block, 1);
+    transform(block_m, 1);
     transform(shifted_message, block_nb);
-    rem_len = new_len % SHA224_256_BLOCK_SIZE;
-    memcpy(m_block, &shifted_message[block_nb << 6], rem_len);
-    m_len = rem_len;
-    m_tot_len += (block_nb + 1) << 6;
+    rem_len = new_len % SHA256_BLOCK_SIZE;
+    memcpy(block_m, &shifted_message[block_nb << 6], rem_len);
+    length_m = rem_len;
+    total_len += (block_nb + 1) << 6;
 }
 
 void SHA256::final(unsigned char *digest)
 {
-    unsigned int block_nb;
+    unsigned int block_dat;
     unsigned int pm_len;
     unsigned int len_b;
     int i;
-    block_nb = (1 + ((SHA224_256_BLOCK_SIZE - 9)
-                     < (m_len % SHA224_256_BLOCK_SIZE)));
-    len_b = (m_tot_len + m_len) << 3;
-    pm_len = block_nb << 6;
-    memset(m_block + m_len, 0, pm_len - m_len);
-    m_block[m_len] = 0x80;
-    SHA2_UNPACK32(len_b, m_block + pm_len - 4);
-    transform(m_block, block_nb);
+    block_dat = (1 + ((SHA256_BLOCK_SIZE - 9)
+                      < (length_m % SHA256_BLOCK_SIZE)));
+    len_b = (total_len + length_m) << 3;
+    pm_len = block_dat << 6;
+    memset(block_m + length_m, 0, pm_len - length_m);
+    block_m[length_m] = 0x80;
+    SHA2_UNPACK32(len_b, block_m + pm_len - 4);
+    transform(block_m, block_dat);
     for (i = 0 ; i < 8; i++) {
         SHA2_UNPACK32(m_h[i], &digest[i << 2]);
     }
