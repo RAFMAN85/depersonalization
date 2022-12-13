@@ -3,45 +3,11 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <cassert>
-#include <stdio.h>
-#include <string.h>
+#include <cstring>
 #include "hashing.h"
+#include "gamma.h"
 
 #define size_of_char(x) (sizeof(x) / sizeof(x[0]))
-
-void* gamming(void* data, unsigned data_size, void* key, unsigned key_size)
-{
-    assert(data && data_size);
-    if (!key || !key_size) return data;
-
-    uint8_t* kptr = (uint8_t*)key; // начало ключа
-    uint8_t* eptr = kptr + key_size; // конец ключа
-
-    // отксоривание
-    for (uint8_t* dptr = (uint8_t*)data; data_size--; dptr++)
-    {
-        *dptr ^= *kptr++;
-        if (kptr == eptr) kptr = (uint8_t*)key; // переход на начало ключа
-    }
-    return data;
-}
-
-void print_as_dump(void* data, unsigned data_size)
-{
-    for (uint8_t* dptr = (uint8_t*)data; data_size--; dptr++) printf("%.2X ", *dptr);
-    printf("\n");
-}
-
-void print_as_text(void* data, unsigned data_size)
-{
-    for (uint8_t* dptr = (uint8_t*)data; data_size--; dptr++)
-        if (isprint(*dptr)) printf("%c", *dptr);
-        else printf("{\\x%.2X}", *dptr);
-    printf("\n");
-}
-
-
 
 int main() {
 
@@ -89,7 +55,7 @@ int main() {
         /*в этом методе одно из значений (country_pers) хэшируется по алгоритму sha256.
          * Такой подход можно назвать надежным, однако при хранении такие данные обратно получить не выйдет.
          */
-        file_out<<id_pers<<";"<<name_pers<<";"<<sex_pers<<";"<<age_pers<<";"<<height_pers<<";"<<weights_pers<<";"<<sha256(country_pers)<<";"<<city_pers<<std::endl;
+        file_out<<id_pers<<","<<name_pers<<","<<sex_pers<<","<<age_pers<<","<<height_pers<<","<<weights_pers<<","<<sha256(country_pers)<<","<<city_pers<<'\n';
 
         /*воспользуемся гаммированием для шифрования данных так, что их можно будет получить обратно, если знать ключ*/
 
@@ -102,13 +68,11 @@ int main() {
         strcpy(country_c,country_pers.c_str());
         strcpy(city_c,city_pers.c_str());
 
-        file_out_g<<id_c<<";"<<name_c<<";"<<sex_c<<";"<<age_c<<";"<<height_c<<";"<<weight_c<<";"<<gamming(country_c, size_of_char(country_c),key, size_of_char(key))<<";"<<city_c<<std::endl;
-
+        file_out_g<<id_c<<","<<name_c<<","<<sex_c<<","<<age_c<<","<<height_c<<","<<weight_c<<","<<gamming(country_c, size_of_char(country_c),key,size_of_char(key))<<","<<city_c<<'\n';
     }
     work_file.close();
     file_out.close();
     file_out_g.close();
-
 
     return 0;
 }
