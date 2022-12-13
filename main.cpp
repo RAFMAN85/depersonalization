@@ -5,7 +5,7 @@
 #include <sstream>
 #include <map>
 #include <cmath>
-#include "sha256.h"
+#include "hashing.h"
 
 int main() {
 
