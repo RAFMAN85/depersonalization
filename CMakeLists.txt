@@ -3,4 +3,4 @@ project(untitled5)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(untitled5 main.cpp sha256.h sha256.cpp)
+add_executable(untitled5 main.cpp hashing.cpp hashing.h)
